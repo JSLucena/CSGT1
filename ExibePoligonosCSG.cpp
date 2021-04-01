@@ -110,7 +110,6 @@ Ponto return_point_intersec2d(Ponto k, Ponto l, Ponto m, Ponto n)
     t = ((l.x - k.x) * (m.y - k.y) - (l.y - k.y) * (m.x - k.x))/ det ;
 
     newPonto = Ponto(k.x + s*(l.x - k.x), k.y + s*(l.y - k.y));
-    newPonto.imprime();
     return newPonto; // h‡ intersecao
 }
 
@@ -120,11 +119,13 @@ bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n)
 {
     int ret;
     double s,t;
+
     ret = intersec2d( k,  l,  m,  n, s, t);
     if (!ret) return false;
     if (s>=0.0 && s <=1.0 && t>=0.0 && t<=1.0)
     {
-        //cout << m.x + t*(n.x - m.x) << ":" << m.y + t*( n.y - m.y) << endl;
+
+       // cout << m.x + t*(n.x - m.x) << ":" << m.y + t*( n.y - m.y) << endl;
         return true;
     }
     else return false;
@@ -347,6 +348,145 @@ void display( void )
 	glutSwapBuffers();
 }
 
+void insereVertice(Ponto p, Poligono &Poli, Ponto novo)
+{
+    int iter;
+     for(iter = 0; iter < Poli.getNVertices(); iter++) ///procura onde devemos inserir o ponto novo
+                {
+                    if(Poli.getVertice(iter).x == p.x && Poli.getVertice(iter).y == p.y )
+                    {
+                         Poli.insereVertice(novo, iter+1);
+                         return;
+                    }
+                }
+}
+
+void testaInterseccao(Poligono &p1, Poligono &p2, bool markedP1[], bool markedP2[])
+{
+    bool alreadyAdded, debug, isInside = false;
+    Ponto auxA1,auxA2, auxB1,auxB2, newPonto;
+    ///// teste de interseccao
+    for(int i = 0; i < p1.getNVertices(); i++)
+    {
+        for(int j = 0; j < p2.getNVertices(); j++)
+        {
+            if(j == p2.getNVertices() - 1 )
+            {
+                auxB1 = p2.getVertice(j);
+                auxB2 = p2.getVertice(0);
+            }
+            else
+            {
+                auxB1 = p2.getVertice(j);
+                auxB2 = p2.getVertice(j+1);
+            }
+            if (i == p1.getNVertices() - 1)
+            {
+                auxA1 = p1.getVertice(i);
+                auxA2 = p1.getVertice(0);
+            }
+            else
+            {
+                auxA1 = p1.getVertice(i);
+                auxA2 = p1.getVertice(i+1);
+            }
+
+            debug = HaInterseccao(auxA1,auxA2,auxB1,auxB2);
+
+            if(debug == true) /// insere o vertice da interseccao se ela existir
+            {
+
+                alreadyAdded = false;
+                newPonto = return_point_intersec2d(auxA1,auxA2,auxB1,auxB2);
+                for(int iter = 0; iter < p1.getNVertices(); iter++)
+                {
+                    if((newPonto.x == auxA2.x && newPonto.y == auxA2.y) || (newPonto.x == auxA1.x && newPonto.y == auxA1.y)) /// Os pontos estavam sendo inseridos multiplas vezes, isso impede q o mesmo ponto apareca denovo
+                    {
+                     //   cout << "Already Added" << endl;
+                        alreadyAdded = true;
+                    }
+
+                }
+                if(alreadyAdded == false)
+                {
+
+                    insereVertice(auxA1,p1,newPonto);
+                    insereVertice(auxB1,p2,newPonto);
+                    /*
+                    cout << "Intersecao em ";
+                    auxA1.imprime();
+                    auxA2.imprime();
+                    auxB1.imprime();
+                    auxB2.imprime();
+                    cout << "Ponto ";
+
+                    */
+                    newPonto.imprime();
+                    cout << "PONTO ADICIONADO" <<endl;
+                }
+            }
+
+
+        }
+
+    }
+}
+
+void classifica(Poligono a, Poligono b, bool (&mark)[100])
+{
+    Ponto classificacao, auxClass;
+    for(int i = 0; i < a.getNVertices(); i++)
+    {
+        if(i == a.getNVertices() - 1 )
+                classificacao = Ponto((a.getVertice(i).x + a.getVertice(0).x)/2,(a.getVertice(i).y + a.getVertice(0).y)/2); ///Ponto medio da aresta
+            else
+                classificacao = Ponto((a.getVertice(i).x + a.getVertice(i+1).x)/2,(a.getVertice(i).y + a.getVertice(i+1).y)/2); ///Ponto medio da aresta
+
+        auxClass = Ponto(0.0,classificacao.y);
+        int intersecCount = 0;
+        for(int j = 0; j < b.getNVertices();j++)
+        {
+            if(j == b.getNVertices() -1)  ///ligar o ultimo ponto com o primeiro
+            {
+                /*
+                classificacao.imprime();
+                auxClass.imprime();
+                b.getVertice(j).imprime();
+                b.getVertice(0).imprime();
+                cout << endl;
+                */
+                if(HaInterseccao(classificacao,auxClass,b.getVertice(j),b.getVertice(0)) == true)
+                {
+
+                 //   cout << "true" << " " ;
+                    intersecCount++;
+                }
+            }
+            else
+            {
+                /*
+                classificacao.imprime();
+                auxClass.imprime();
+                b.getVertice(j).imprime();
+                b.getVertice(j+1).imprime();
+                cout << endl;
+                */
+                if(HaInterseccao(classificacao,auxClass,b.getVertice(j),b.getVertice(j+1)) == true)
+                {
+
+                  //  cout << "true" << " " ;
+                    intersecCount++;
+                }
+            }
+
+        }
+    //    cout << "  " << intersecCount << endl;
+        if (intersecCount % 2 == 0) ///se o numero de interseccoes for par o ponto esta fora do poligono
+            mark[i] = false;
+        else
+            mark[i] = true;
+    }
+}
 //########################### UNIAO #####################################
 Poligono uniao(Poligono a, Poligono b)
 {
@@ -354,8 +494,9 @@ Poligono uniao(Poligono a, Poligono b)
     bool debug;
     vertA = a.getNVertices();
     vertB = b.getNVertices();
-    Ponto auxA1,auxA2, auxB1,auxB2, newPonto;
-    Poligono newA = Poligono(), newB = Poligono();
+    Poligono newA = Poligono(), newB = Poligono(), uni = Poligono();
+    Ponto classificacao, auxClass;
+    bool markA[100], markB[100], isInside = false;
 
     /// Criacao de poligonos auxiliares, para mantermos os poligonos originais intactos
     for (int i = 0; i < vertA; i++)
@@ -369,58 +510,54 @@ Poligono uniao(Poligono a, Poligono b)
     ////////////////////////////////////////////////////////////////////
 
 
+    testaInterseccao(newA,newB,markA,markB);
 
-    ///// teste de interseccao
-    for(int i = 0; i < vertA; i++)
-    {
-        for(int j = 0; j < vertB; j++)
-        {
-            if(j == vertB - 1 )
-            {
-                auxB1 = b.getVertice(j);
-                auxB2 = b.getVertice(0);
-            }
-            else
-            {
-                auxB1 = b.getVertice(j);
-                auxB2 = b.getVertice(j+1);
-            }
-            if (i == vertA - 1)
-            {
-                auxA1 = a.getVertice(i);
-                auxA2 = a.getVertice(0);
-            }
-            else
-            {
-                auxA1 = a.getVertice(i);
-                auxA2 = a.getVertice(i+1);
-            }
+    classifica(newA,B,markA);
+    classifica(newB,A,markB);
 
-            debug = HaInterseccao(auxA1,auxA2,auxB1,auxB2);
 
-            if(debug == true) //// insere o vertice da interseccao se ela existir
-            {
-                newPonto = return_point_intersec2d(auxA1,auxA2,auxB1,auxB2);
-                newA.insereVertice(newPonto, i+1);
-                newB.insereVertice(newPonto, j+1);
-                /*
-                cout << "Intersecao em ";
-                auxA1.imprime();
-                auxA2.imprime();
-                auxB1.imprime();
-                auxB2.imprime();
-                cout << "Ponto ";
-
-                */
-                newPonto.imprime();
-                cout << "PONTO ADICIONADO" <<endl;
-
-            }
-        }
-    }
     newA.imprime();
     cout << endl;
+    for(int i = 0; i < newA.getNVertices(); i++)
+        cout << markA[i];
+    cout << endl;
     newB.imprime();
+    cout << endl;
+    for(int i = 0; i < newB.getNVertices(); i++)
+        cout << markB[i];
+
+    cout << endl;
+
+    int verts = newA.getNVertices();
+    bool currentPoly = false; //falso = poligono 1, verdadeiro = poligono 2
+    bool visitedA[100], visitedB[100];
+    for(int pointCounter = 0; pointCounter < verts; pointCounter++)
+    {
+        if (currentPoly == false)
+        {
+            if(visitedA == false)
+                {
+
+
+                if(markA[pointcounter] == false)
+                {
+                    uniao.insereVertice(newA.getVertice(pointCounter));
+                }
+                else
+                {
+
+                }
+            }
+            visitedA[pointCounter] = true;
+
+        }
+        else
+        {
+
+            visitedB[pointCounter] = true;
+        }
+    }
+
 
     return a;
 }

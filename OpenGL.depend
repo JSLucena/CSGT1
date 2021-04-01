@@ -192,3 +192,56 @@
 1584988348 source:f:\trabalhos\20211\cg\t1\temporizador.cpp
 	"Temporizador.h"
 
+1617290281 source:f:\trabalhos\20211\cg\csgt1\exibepoligonoscsg.cpp
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	"Poligono.h"
+	"Temporizador.h"
+
+1298986600 f:\trabalhos\20211\cg\csgt1\gl\glut.h
+	"freeglut.h"
+
+1298986600 f:\trabalhos\20211\cg\csgt1\gl\freeglut.h
+	"freeglut_std.h"
+	"freeglut_ext.h"
+
+1298986600 f:\trabalhos\20211\cg\csgt1\gl\freeglut_std.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1298986600 f:\trabalhos\20211\cg\csgt1\gl\freeglut_ext.h
+
+1615414730 f:\trabalhos\20211\cg\csgt1\ponto.h
+	<iostream>
+
+1616868149 f:\trabalhos\20211\cg\csgt1\poligono.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	<vector>
+
+1584988812 f:\trabalhos\20211\cg\csgt1\temporizador.h
+	<iostream>
+	<windows.h>
+	<sys/time.h>
+
+1616868154 source:f:\trabalhos\20211\cg\csgt1\poligono.cpp
+	"Poligono.h"
+
+1615413732 source:f:\trabalhos\20211\cg\csgt1\ponto.cpp
+	"Ponto.h"
+
+1584988348 source:f:\trabalhos\20211\cg\csgt1\temporizador.cpp
+	"Temporizador.h"
+
