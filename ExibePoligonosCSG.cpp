@@ -174,13 +174,13 @@ void init()
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
     // Le o primeiro pol’gono
-    LePoligono("Retangulo.txt", A);
+    LePoligono("Triangulo.txt", A);
     A.obtemLimites(Min, Max);
     cout << "\tMinimo:"; Min.imprime();
     cout << "\tMaximo:"; Max.imprime();
 
     // Le o segundo pol’gono
-    LePoligono("Triangulo.txt", B);
+    LePoligono("Retangulo.txt", B);
     B.obtemLimites(MinAux, MaxAux);
     cout << "\tMinimo:"; MinAux.imprime();
     cout << "\tMaximo:"; MaxAux.imprime();
@@ -529,36 +529,120 @@ Poligono uniao(Poligono a, Poligono b)
     cout << endl;
 
     int verts = newA.getNVertices();
-    bool currentPoly = false; //falso = poligono 1, verdadeiro = poligono 2
-    bool visitedA[100], visitedB[100];
-    for(int pointCounter = 0; pointCounter < verts; pointCounter++)
-    {
-        if (currentPoly == false)
-        {
-            if(visitedA == false)
+    bool currentPoly = false; //true = poligono 1, false = poligono 2
+    bool visitedA[100], visitedB[100], done = false;
+    bool changePoly = false;
+    Ponto last;
+    cout << changePoly << endl;
+
+   while(!done)
+   {
+    bool auxA,auxB;
+       if(currentPoly == true)
+       {
+           auxA = true;
+           for(int i = 0; i < newA.getNVertices();i++)
+           {
+                if(newA.getVertice(i).x == last.x && newA.getVertice(i).y == last.y)
+                    changePoly = false;
+                if(changePoly == false)
                 {
+                    if (visitedA[i] == false)
+                    {
+                       auxA = false;
+                       if (markA[i] == false)
+                       {
+                                cout << "adding A" << " ";
+                                newA.getVertice(i).imprime();
+                                cout << endl;
+                                if(uni.getNVertices() == 0)
+                                    uni.insereVertice(newA.getVertice(i));
+                                if(i != newA.getNVertices() -1 )
+                                    uni.insereVertice(newA.getVertice(i+1));
+                                visitedA[i] = true;
+                       }
+                       else
+                       {
+                           if(uni.getNVertices() != 0)
+                           {
+
+                            cout << "Troca A ";
+                            newA.getVertice(i).imprime();
+                            cout << endl;
+                            last = uni.getVertice(uni.getNVertices()-1);;
+                            currentPoly = !currentPoly;
+                            changePoly = true;
+                           }
+                            visitedA[i] = true;
+                       }
+               }
+           }
 
 
-                if(markA[pointcounter] == false)
+        }
+     //   cout << currentPoly;
+        if(auxA == true)
+            if(auxB == true)
+                done = true;
+            else
+                currentPoly = !currentPoly;
+
+       }
+       else
+       {
+            auxB = true;
+            for(int i = 0; i < newB.getNVertices();i++)
+            {
+                if(newB.getVertice(i).x == last.x && newB.getVertice(i).y == last.y)
+                    changePoly = false;
+                if(changePoly == false)
                 {
-                    uniao.insereVertice(newA.getVertice(pointCounter));
+                    if (visitedB[i] == false)
+                   {
+                       auxB = false;
+                       if (markB[i] == false)
+                       {
+                                cout << "adding B " << " ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+                                if(uni.getNVertices() == 0)
+                                    uni.insereVertice(newB.getVertice(i));
+                                if(i == newB.getNVertices() -1 )
+                                    uni.insereVertice(newB.getVertice(0));
+                                else
+                                    uni.insereVertice(newB.getVertice(i+1));
+
+                                visitedB[i] = true;
+                       }
+                       else
+                       {
+                            if(uni.getNVertices() != 0)
+                           {
+                               cout << "Troca B ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+                               visitedB[i] = true;
+                               last = uni.getVertice(uni.getNVertices()-1);
+                               currentPoly = !currentPoly;
+                               changePoly = true;
+                           }
+
+                       }
+                   }
                 }
-                else
-                {
 
-                }
             }
-            visitedA[pointCounter] = true;
+       //     cout << auxB;
+           if(auxB == true)
+                if(auxA == true)
+                    done = true;
+                else
+                    currentPoly = !currentPoly;
 
-        }
-        else
-        {
-
-            visitedB[pointCounter] = true;
-        }
-    }
-
-
+       }
+   }
+    uni.imprime();
+    cout << endl;
     return a;
 }
 //#######################################################################
