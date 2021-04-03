@@ -192,7 +192,7 @@
 1584988348 source:f:\trabalhos\20211\cg\t1\temporizador.cpp
 	"Temporizador.h"
 
-1617403190 source:f:\trabalhos\20211\cg\csgt1\exibepoligonoscsg.cpp
+1617478575 source:f:\trabalhos\20211\cg\csgt1\exibepoligonoscsg.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -222,7 +222,7 @@
 1615414730 f:\trabalhos\20211\cg\csgt1\ponto.h
 	<iostream>
 
-1616868149 f:\trabalhos\20211\cg\csgt1\poligono.h
+1617476541 f:\trabalhos\20211\cg\csgt1\poligono.h
 	<iostream>
 	<windows.h>
 	<glut.h>
@@ -236,7 +236,7 @@
 	<windows.h>
 	<sys/time.h>
 
-1616868154 source:f:\trabalhos\20211\cg\csgt1\poligono.cpp
+1617476561 source:f:\trabalhos\20211\cg\csgt1\poligono.cpp
 	"Poligono.h"
 
 1615413732 source:f:\trabalhos\20211\cg\csgt1\ponto.cpp

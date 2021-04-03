@@ -17,7 +17,10 @@ void Poligono::insereVertice(Ponto p)
 {
     Vertices.push_back(p);
 }
-
+void Poligono::removeVertice()
+{
+    Vertices.pop_back();
+}
 Ponto Poligono::getVertice(int i)
 {
     return Vertices[i];
