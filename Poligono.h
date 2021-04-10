@@ -38,7 +38,7 @@ public:
     Ponto getVertice(int);
     unsigned long getNVertices();
     void insereVertice(Ponto);
-    void removeVertice();
+    void removeVertice(int i);
     void insereVertice(Ponto p, int pos);
     void desenhaPoligono();
     void desenhaVertices();
