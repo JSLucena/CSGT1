@@ -13,6 +13,22 @@
 // Selecione a pasta onde voce descompactou o ZIP que continha este arquivo.
 //
 
+
+//// TR-RT => NOK, acho q eh lixo
+//// TR-O1 => Parece OK
+//// TR-O2 => OK, LGTM
+//// TR-O3 => OK, LGTM
+//// TR-04 => OK, LGTM
+//// RT-O1 => NOK, alem do lixo caiu no caso especial
+//// RT-02 => SEM TESTE
+//// RT-03 => FALHA TOTAL
+//// RT-04 => SEM TESTE
+//// O1-O2 => NOK, caiu no caso especial
+//// O1-O3 => OK, LGTM
+//// 01-04 => Parece OK
+//// O2-O3 => NAO SERA TRATADO
+//// O2-O4 => SEM TESTE
+//// O3-O4 => FALHA TOTAL
 #include <iostream>
 #include <cmath>
 #include <ctime>
@@ -41,8 +57,8 @@ include <sys/time.h>
 
 #include "Temporizador.h"
 
-#define FILE2 "Triangulo.txt"
-#define FILE1 "Retangulo.txt"
+#define FILE2 "Objeto3.txt"
+#define FILE1 "Objeto4.txt"
 
 Temporizador T;
 double AccumDeltaT=0;
@@ -164,7 +180,7 @@ void insereVerticeSearch(Ponto p, Poligono &Poli, Ponto novo)
 }
 void testaInterseccao(Poligono &p1, Poligono &p2, bool markedP1[], bool markedP2[])
 {
-    bool alreadyAdded, debug, isInside = false;
+    bool alreadyAddedp1,alreadyAddedp2, debug, isInside = false;
     Ponto auxA1,auxA2, auxB1,auxB2, newPonto;
     /// teste de interseccao
     for(int i = 0; i < p1.getNVertices(); i++)
@@ -197,33 +213,36 @@ void testaInterseccao(Poligono &p1, Poligono &p2, bool markedP1[], bool markedP2
             if(debug == true) /// insere o vertice da interseccao se ela existir
             {
 
-                alreadyAdded = false;
+                alreadyAddedp1 = false;
+                alreadyAddedp2 = false;
                 newPonto = return_point_intersec2d(auxA1,auxA2,auxB1,auxB2);
-               // for(int iter = 0; iter < p1.getNVertices(); iter++)
-           //     {
-                    if((newPonto.x == auxA2.x && newPonto.y == auxA2.y) || (newPonto.x == auxA1.x && newPonto.y == auxA1.y)) /// Os pontos estavam sendo inseridos multiplas vezes, isso impede q o mesmo ponto apareca denovo
+                for(int iter = 0; iter < p1.getNVertices(); iter++)
+                {
+                    if(newPonto.x == p1.getVertice(iter).x && newPonto.y == p1.getVertice(iter).y) /// Os pontos estavam sendo inseridos multiplas vezes, isso impede q o mesmo ponto apareca denovo
                     {
-                     //   cout << "Already Added" << endl;
-                        alreadyAdded = true;
+                        cout << "Already Added P1" << endl;
+                        alreadyAddedp1 = true;
                     }
 
-            //    }
-                if(alreadyAdded == false)
+               }
+               for(int iter = 0; iter < p2.getNVertices(); iter++)
                 {
+                    if(newPonto.x == p2.getVertice(iter).x && newPonto.y == p2.getVertice(iter).y) /// Os pontos estavam sendo inseridos multiplas vezes, isso impede q o mesmo ponto apareca denovo
+                    {
+                        cout << "Already Added P2" << endl;
+                        alreadyAddedp2 = true;
+                    }
 
+               }
+                if(alreadyAddedp1 == false)
+                {
                     insereVerticeSearch(auxA1,p1,newPonto);
+                }
+                if(alreadyAddedp2 == false)
                     insereVerticeSearch(auxB1,p2,newPonto);
-                    /*
-                    cout << "Intersecao em ";
-                    auxA1.imprime();
-                    auxA2.imprime();
-                    auxB1.imprime();
-                    auxB2.imprime();
-                    cout << "Ponto ";
 
-                    */
-                    newPonto.imprime();
-                    cout << "PONTO ADICIONADO" <<endl;
+                newPonto.imprime();
+                cout << "PONTO ADICIONADO" <<endl;
                 }
             }
 
@@ -231,7 +250,7 @@ void testaInterseccao(Poligono &p1, Poligono &p2, bool markedP1[], bool markedP2
         }
 
     }
-}
+
 void classifica(Poligono a, Poligono b, bool (&mark)[100])
 {
     Ponto classificacao, auxClass;
@@ -257,7 +276,6 @@ void classifica(Poligono a, Poligono b, bool (&mark)[100])
                 */
                 if(HaInterseccao(classificacao,auxClass,b.getVertice(j),b.getVertice(0)) == true)
                 {
-
                     intersecCount++;
                 }
             }
@@ -323,6 +341,486 @@ void LePoligono(const char *nome, Poligono &P)
 // **********************************************************************
 //
 // **********************************************************************
+Poligono uniao(Poligono a, Poligono b)
+{
+    unsigned long vertA, vertB;
+    bool debug;
+    vertA = a.getNVertices();
+    vertB = b.getNVertices();
+  //  Poligono newA = Poligono(), newB = Poligono();
+    Poligono uni = Poligono();
+    Ponto classificacao, auxClass;
+//    bool markA[100], markB[100], isInside = false;
+    int verts = newA.getNVertices();
+    bool currentPoly = true; //true = poligono 1, false = poligono 2
+    bool visitedA[100], visitedB[100], done = false;
+    for(int i = 0; i < 100;i++)
+    {
+        visitedA[i] = false;
+        visitedB[i] = false;
+    }
+    bool changePoly = false;
+    Ponto last;
+    cout << changePoly << endl;
+   while(!done) /// Construcao do poligono uniao A-B
+   {
+    bool auxA,auxB;
+       if(currentPoly == true) ///Comecamos analisando o poligono A
+       {
+           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
+           for(int i = 0; i < newA.getNVertices();i++)
+           {
+
+
+                if(newA.getVertice(i).x == last.x && newA.getVertice(i).y == last.y)
+                {
+                    cout << "Found";
+                    last.imprime();
+                    cout << endl;
+                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
+                }
+                if(changePoly == false)
+                {
+                    if (visitedA[i] == false)
+                    {
+                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos
+                       if (markA[i] == false)
+                       {
+                                cout << "adding A" << " ";
+                                newA.getVertice(i).imprime();
+                                cout << endl;
+                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
+                                if(uni.getNVertices() == 0)
+                                    uni.insereVertice(newA.getVertice(i));
+                                if(i == newA.getNVertices() -1 )
+                                        uni.insereVertice(newA.getVertice(0));
+                                else
+                                        uni.insereVertice(newA.getVertice(i+1));
+                                visitedA[i] = true;
+                       }
+                       else
+                       {
+                           if(uni.getNVertices() != 0)
+                           {
+
+                            cout << "Troca A ";
+                            newA.getVertice(i).imprime();
+                            cout << endl;
+                            last = uni.getVertice(uni.getNVertices()-1);;
+                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
+                            changePoly = true;
+                           }
+                            visitedA[i] = true;
+                       }
+               }
+           }
+
+
+
+        }
+        if(auxA == true)
+            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
+                done = true;
+            else
+                currentPoly = !currentPoly;
+       }
+       else
+       {
+            auxB = true;
+            for(int i = 0; i < newB.getNVertices();i++)
+            {
+
+                if(newB.getVertice(i).x == last.x && newB.getVertice(i).y == last.y)
+                {
+                    cout << "Found ";
+                    last.imprime();
+                    cout << endl;
+                     changePoly = false;
+                }
+                if(changePoly == false)
+                {
+                    if (visitedB[i] == false)
+                   {
+                       auxB = false;
+
+                       if (markB[i] == false)
+                       {
+                                cout << "adding B " << " ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+                                if(uni.getNVertices() == 0)
+                                    uni.insereVertice(newB.getVertice(i));
+                                if(i == newB.getNVertices() -1 )
+                                        uni.insereVertice(newB.getVertice(0));
+                                else
+                                        uni.insereVertice(newB.getVertice(i+1));
+
+                                visitedB[i] = true;
+                       }
+                       else
+                       {
+                            if(uni.getNVertices() != 0)
+                           {
+                               cout << "Troca B ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+
+                               last = uni.getVertice(uni.getNVertices()-1);
+                               currentPoly = !currentPoly;
+                               changePoly = true;
+                           }
+                           visitedB[i] = true;
+
+                       }
+                   }
+                }
+
+
+            }
+           if(auxB == true)
+                if(auxA == true)
+                    done = true;
+                else
+                    currentPoly = !currentPoly;
+
+       }
+   }
+
+   for(int i =0; i < uni.getNVertices()- 1;i++) ///Remover algum vertice que foi adicionado duplo
+   {
+        for(int j = i+1; j < uni.getNVertices();j++)
+        {
+            if(uni.getVertice(i).x == uni.getVertice(j).x && uni.getVertice(i).y == uni.getVertice(j).y)
+                uni.removeVertice(j);
+        }
+   }
+
+    uni.imprime();
+    cout << endl;
+    return uni;
+}
+//#######################################################################
+Poligono intersecao(Poligono a, Poligono b)
+{
+
+    unsigned long vertA, vertB;
+    bool debug;
+    vertA = a.getNVertices();
+    vertB = b.getNVertices();
+//    Poligono newA = Poligono(), newB = Poligono()
+    Poligono inter = Poligono();
+    Ponto classificacao, auxClass;
+   // bool markA[100], markB[100], isInside = false;
+    int verts = newA.getNVertices();
+    bool currentPoly = true; //true = poligono 1, false = poligono 2
+    bool visitedA[100], visitedB[100], done = false;
+    bool changePoly = false;
+    for(int i = 0; i < 100;i++)
+    {
+        visitedA[i] = false;
+        visitedB[i] = false;
+    }
+    Ponto last;
+    cout << changePoly << endl;
+   while(!done) /// Construcao do poligono uniao A-B
+   {
+    bool auxA,auxB;
+       if(currentPoly == true) ///Comecamos analisando o poligono A
+       {
+           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
+           for(int i = 0; i < newA.getNVertices();i++)
+           {
+                if(newA.getVertice(i).x == last.x && newA.getVertice(i).y == last.y)
+                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
+                if(changePoly == false)
+                {
+                    if (visitedA[i] == false)
+                    {
+                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos
+                       if (markA[i] == true)
+                       {
+                                cout << "adding A" << " ";
+                                newA.getVertice(i).imprime();
+                                cout << endl;
+                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
+                                if(uni.getNVertices() == 0)
+                                    inter.insereVertice(newA.getVertice(i));
+                                if(i == newA.getNVertices() -1 )
+                                        inter.insereVertice(newA.getVertice(0));
+                                else
+                                        inter.insereVertice(newA.getVertice(i+1));
+                                visitedA[i] = true;
+                       }
+                       else
+                       {
+                           if(inter.getNVertices() != 0)
+                           {
+
+                            cout << "Troca A ";
+                            newA.getVertice(i).imprime();
+                            cout << endl;
+                            last = inter.getVertice(inter.getNVertices()-1);;
+                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
+                            changePoly = true;
+                           }
+                            visitedA[i] = true;
+                       }
+               }
+           }
+
+
+        }
+        if(auxA == true)
+            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
+                done = true;
+            else
+                currentPoly = !currentPoly;
+       }
+       else
+       {
+            auxB = true;
+            for(int i = 0; i < newB.getNVertices();i++)
+            {
+                if(newB.getVertice(i).x == last.x && newB.getVertice(i).y == last.y)
+                    changePoly = false;
+                if(changePoly == false)
+                {
+                    if (visitedB[i] == false)
+                   {
+                       auxB = false;
+                       if (markB[i] == true)
+                       {
+                                cout << "adding B " << " ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+                                if(inter.getNVertices() == 0)
+                                    inter.insereVertice(newB.getVertice(i));
+                                if(i == newB.getNVertices() -1 )
+                                        inter.insereVertice(newB.getVertice(0));
+                                else
+                                        inter.insereVertice(newB.getVertice(i+1));
+
+                                visitedB[i] = true;
+                       }
+                       else
+                       {
+                            if(inter.getNVertices() != 0)
+                           {
+                               cout << "Troca B ";
+                                newB.getVertice(i).imprime();
+                                cout << endl;
+                               visitedB[i] = true;
+                               last = inter.getVertice(inter.getNVertices()-1);
+                               currentPoly = !currentPoly;
+                               changePoly = true;
+                           }
+
+                       }
+                   }
+                }
+
+            }
+           if(auxB == true)
+                if(auxA == true)
+                    done = true;
+                else
+                    currentPoly = !currentPoly;
+
+       }
+   }
+
+    inter.imprime();
+    cout << endl;
+    return inter;
+}
+Poligono diferenca(Poligono a, Poligono b, bool mark[100], bool markUm[100])
+{
+    unsigned long vertA, vertB;
+    bool debug;
+    vertA = a.getNVertices();
+    vertB = b.getNVertices();
+ //   Poligono newA = Poligono(), newB = Poligono();
+    Poligono diff = Poligono(), invertB = Poligono();
+    Ponto classificacao, auxClass;
+   // bool markA[100], markB[100],, isInside = false;
+    bool invertMarkB[100];
+
+    /// Inverte o poligono B e suas marcacoes em relacao ao A
+    for(int i = 0; i < b.getNVertices();i++)
+    {
+        //bool invertMark;
+       // invertMark = mark[b.getNVertices()-1-i];
+        invertB.insereVertice(b.getVertice(b.getNVertices()-1 -i ));
+       // invertMarkB[i] = mark[b.getNVertices()-1-i];
+    }
+    invertB.imprime();
+    classifica(invertB,a,invertMarkB);
+    cout << endl;
+    for(int i = 0; i < b.getNVertices(); i++)
+        cout << invertMarkB[i];
+
+    cout << endl;
+
+
+    int verts = a.getNVertices();
+    bool currentPoly = true; //true = poligono 1, false = poligono 2
+    bool visitedA[100], visitedB[100], done = false;
+    bool changePoly = false;
+    for(int i = 0; i < 100;i++)
+    {
+        visitedA[i] = false;
+        visitedB[i] = false;
+    }
+    Ponto last;
+    cout << changePoly << endl;
+   while(!done) /// Construcao do poligono uniao A-B
+   {
+    bool auxA,auxB;
+       if(currentPoly == true) ///Comecamos analisando o poligono A
+       {
+           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
+           for(int i = 0; i < a.getNVertices();i++)
+           {
+                if(a.getVertice(i).x == last.x && a.getVertice(i).y == last.y)
+                     {
+                    cout << "Found";
+                    last.imprime();
+                    cout << endl;
+                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
+                }
+                if(changePoly == false)
+                {
+                    if (visitedA[i] == false)
+                    {
+                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos;
+                       if (markUm[i] == false)
+                       {
+                                cout << "adding A" << " ";
+                                a.getVertice(i).imprime();
+                                if(i == a.getNVertices() -1 )
+                                    a.getVertice(0).imprime();
+                                else
+                                    a.getVertice(i+1).imprime();
+                                cout << endl;
+                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
+                                if(diff.getNVertices() == 0)
+                                    diff.insereVertice(a.getVertice(i));
+                                if(i == a.getNVertices() -1 )
+                                            diff.insereVertice(a.getVertice(0));
+                                else
+                                            diff.insereVertice(a.getVertice(i+1));
+                                visitedA[i] = true;
+                       }
+                       else
+                       {
+                           if(diff.getNVertices() != 0)
+                           {
+
+                            cout << "Troca A ";
+                            a.getVertice(i).imprime();
+                            cout << endl;
+                            last = diff.getVertice(diff.getNVertices()-1);;
+                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
+                            changePoly = true;
+                           }
+                            visitedA[i] = true;
+                       }
+               }
+           }
+
+
+        }
+        if(auxA == true)
+            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
+                done = true;
+            else
+                currentPoly = !currentPoly;
+       }
+       else
+       {
+            auxB = true;
+            for(int i = 0; i < invertB.getNVertices();i++)
+            {
+                if(invertB.getVertice(i).x == last.x && invertB.getVertice(i).y == last.y)
+                {
+                     {
+                    cout << "Found";
+                    last.imprime();
+                    cout << endl;
+                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
+                }
+                }
+
+                if(changePoly == false)
+                {
+                    if (visitedB[i] == false)
+                   {
+                        auxB = false;
+                       if (invertMarkB[i] == true)
+                       {
+
+
+                               cout << "adding B " << " ";
+                                invertB.getVertice(i).imprime();
+                                if(i == invertB.getNVertices() -1 )
+                                    invertB.getVertice(0).imprime();
+                                else
+                                    invertB.getVertice(i+1).imprime();
+                                cout << endl;
+                                if(diff.getNVertices() == 0)
+                                    diff.insereVertice(invertB.getVertice(i));
+                                if(i == invertB.getNVertices() -1 )
+                                            diff.insereVertice(invertB.getVertice(0));
+                                else
+                                            diff.insereVertice(invertB.getVertice(i+1));
+
+                                visitedB[i] = true;
+
+
+                       }
+                       else
+                       {
+                            if(diff.getNVertices() != 0)
+                           {
+                               cout << "Troca B ";
+                                invertB.getVertice(i).imprime();
+                                cout << endl;
+                               visitedB[i] = true;
+                               last = diff.getVertice(diff.getNVertices()-1);
+                               currentPoly = !currentPoly;
+                               changePoly = true;
+                           }
+                            visitedB[i] = true;
+
+                       }
+                   }
+                }
+
+
+            }
+           if(auxB == true)
+                if(auxA == true)
+                    done = true;
+                else
+                    currentPoly = !currentPoly;
+
+       }
+   }
+
+   for(int i =0; i < diff.getNVertices()- 1;i++) ///Remover algum vertice que foi adicionado duplo
+   {
+        for(int j = i+1; j < diff.getNVertices();j++)
+        {
+
+            if(diff.getVertice(i).x == diff.getVertice(j).x && diff.getVertice(i).y == diff.getVertice(j).y)
+                diff.removeVertice(j);
+        }
+   }
+
+    diff.imprime();
+    cout << endl;
+    return diff;
+}
 void init()
 {
     Ponto MinAux, MaxAux;
@@ -395,6 +893,12 @@ void init()
     cout << endl;
 
 
+    uni = uniao(A,B);
+    intersec = intersecao(A,B);
+    diferencaAB = diferenca(newA,newB,markB, markA);
+    diferencaBA = diferenca(newB,newA,markA, markB);
+
+
 }
 
 double nFrames=0;
@@ -416,6 +920,7 @@ void animate()
         //angulo+=0.05;
         glutPostRedisplay();
     }
+    /*
     if (TempoTotal > 5.0)
     {
         cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
@@ -424,6 +929,7 @@ void animate()
         TempoTotal = 0;
         nFrames = 0;
     }
+    */
 }
 // **********************************************************************
 //  void reshape( int w, int h )
@@ -555,454 +1061,7 @@ bool findPoint(Poligono a, Ponto p)
 }
 
 //########################### UNIAO #####################################
-Poligono uniao(Poligono a, Poligono b)
-{
-    unsigned long vertA, vertB;
-    bool debug;
-    vertA = a.getNVertices();
-    vertB = b.getNVertices();
-  //  Poligono newA = Poligono(), newB = Poligono();
-    Poligono uni = Poligono();
-    Ponto classificacao, auxClass;
-//    bool markA[100], markB[100], isInside = false;
-    int verts = newA.getNVertices();
-    bool currentPoly = true; //true = poligono 1, false = poligono 2
-    bool visitedA[100], visitedB[100], done = false;
-    bool changePoly = false;
-    Ponto last;
-    cout << changePoly << endl;
-   while(!done) /// Construcao do poligono uniao A-B
-   {
-    bool auxA,auxB;
-       if(currentPoly == true) ///Comecamos analisando o poligono A
-       {
-           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
-           for(int i = 0; i < newA.getNVertices();i++)
-           {
-                if(newA.getVertice(i).x == last.x && newA.getVertice(i).y == last.y)
-                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
-                if(changePoly == false)
-                {
-                    if (visitedA[i] == false)
-                    {
-                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos
-                       if (markA[i] == false)
-                       {
-                                cout << "adding A" << " ";
-                                newA.getVertice(i).imprime();
-                                cout << endl;
-                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
-                                if(uni.getNVertices() == 0)
-                                    uni.insereVertice(newA.getVertice(i));
-                                if(i == newA.getNVertices() -1 )
-                                        uni.insereVertice(newA.getVertice(0));
-                                else
-                                        uni.insereVertice(newA.getVertice(i+1));
-                                visitedA[i] = true;
-                       }
-                       else
-                       {
-                           if(uni.getNVertices() != 0)
-                           {
 
-                            cout << "Troca A ";
-                            newA.getVertice(i).imprime();
-                            cout << endl;
-                            last = uni.getVertice(uni.getNVertices()-1);;
-                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
-                            changePoly = true;
-                           }
-                            visitedA[i] = true;
-                       }
-               }
-           }
-
-
-        }
-        if(auxA == true)
-            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
-                done = true;
-            else
-                currentPoly = !currentPoly;
-       }
-       else
-       {
-            auxB = true;
-            for(int i = 0; i < newB.getNVertices();i++)
-            {
-                if(newB.getVertice(i).x == last.x && newB.getVertice(i).y == last.y)
-                    changePoly = false;
-                if(changePoly == false)
-                {
-                    if (visitedB[i] == false)
-                   {
-                       auxB = false;
-                       if (markB[i] == false)
-                       {
-                                cout << "adding B " << " ";
-                                newB.getVertice(i).imprime();
-                                cout << endl;
-                                if(uni.getNVertices() == 0)
-                                    uni.insereVertice(newB.getVertice(i));
-                                if(i == newB.getNVertices() -1 )
-                                        uni.insereVertice(newB.getVertice(0));
-                                else
-                                        uni.insereVertice(newB.getVertice(i+1));
-
-                                visitedB[i] = true;
-                       }
-                       else
-                       {
-                            if(uni.getNVertices() != 0)
-                           {
-                               cout << "Troca B ";
-                                newB.getVertice(i).imprime();
-                                cout << endl;
-                               visitedB[i] = true;
-                               last = uni.getVertice(uni.getNVertices()-1);
-                               currentPoly = !currentPoly;
-                               changePoly = true;
-                           }
-
-                       }
-                   }
-                }
-
-            }
-           if(auxB == true)
-                if(auxA == true)
-                    done = true;
-                else
-                    currentPoly = !currentPoly;
-
-       }
-   }
-   for(int i =0; i < uni.getNVertices()- 1;i++) ///Remover algum vertice que foi adicionado duplo
-   {
-        for(int j = i+1; j < uni.getNVertices();j++)
-        {
-            if(uni.getVertice(i).x == uni.getVertice(j).x && uni.getVertice(i).y == uni.getVertice(j).y)
-                uni.removeVertice(j);
-        }
-   }
-    uni.imprime();
-    cout << endl;
-    return uni;
-}
-//#######################################################################
-Poligono intersecao(Poligono a, Poligono b)
-{
-
-    unsigned long vertA, vertB;
-    bool debug;
-    vertA = a.getNVertices();
-    vertB = b.getNVertices();
-//    Poligono newA = Poligono(), newB = Poligono()
-    Poligono inter = Poligono();
-    Ponto classificacao, auxClass;
-   // bool markA[100], markB[100], isInside = false;
-    int verts = newA.getNVertices();
-    bool currentPoly = true; //true = poligono 1, false = poligono 2
-    bool visitedA[100], visitedB[100], done = false;
-    bool changePoly = false;
-    Ponto last;
-    cout << changePoly << endl;
-   while(!done) /// Construcao do poligono uniao A-B
-   {
-    bool auxA,auxB;
-       if(currentPoly == true) ///Comecamos analisando o poligono A
-       {
-           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
-           for(int i = 0; i < newA.getNVertices();i++)
-           {
-                if(newA.getVertice(i).x == last.x && newA.getVertice(i).y == last.y)
-                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
-                if(changePoly == false)
-                {
-                    if (visitedA[i] == false)
-                    {
-                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos
-                       if (markA[i] == true)
-                       {
-                                cout << "adding A" << " ";
-                                newA.getVertice(i).imprime();
-                                cout << endl;
-                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
-                                if(uni.getNVertices() == 0)
-                                    inter.insereVertice(newA.getVertice(i));
-                                if(i == newA.getNVertices() -1 )
-                                        inter.insereVertice(newA.getVertice(0));
-                                else
-                                        inter.insereVertice(newA.getVertice(i+1));
-                                visitedA[i] = true;
-                       }
-                       else
-                       {
-                           if(inter.getNVertices() != 0)
-                           {
-
-                            cout << "Troca A ";
-                            newA.getVertice(i).imprime();
-                            cout << endl;
-                            last = inter.getVertice(inter.getNVertices()-1);;
-                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
-                            changePoly = true;
-                           }
-                            visitedA[i] = true;
-                       }
-               }
-           }
-
-
-        }
-        if(auxA == true)
-            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
-                done = true;
-            else
-                currentPoly = !currentPoly;
-       }
-       else
-       {
-            auxB = true;
-            for(int i = 0; i < newB.getNVertices();i++)
-            {
-                if(newB.getVertice(i).x == last.x && newB.getVertice(i).y == last.y)
-                    changePoly = false;
-                if(changePoly == false)
-                {
-                    if (visitedB[i] == false)
-                   {
-                       auxB = false;
-                       if (markB[i] == true)
-                       {
-                                cout << "adding B " << " ";
-                                newB.getVertice(i).imprime();
-                                cout << endl;
-                                if(inter.getNVertices() == 0)
-                                    inter.insereVertice(newB.getVertice(i));
-                                if(i == newB.getNVertices() -1 )
-                                        inter.insereVertice(newB.getVertice(0));
-                                else
-                                        inter.insereVertice(newB.getVertice(i+1));
-
-                                visitedB[i] = true;
-                       }
-                       else
-                       {
-                            if(inter.getNVertices() != 0)
-                           {
-                               cout << "Troca B ";
-                                newB.getVertice(i).imprime();
-                                cout << endl;
-                               visitedB[i] = true;
-                               last = inter.getVertice(inter.getNVertices()-1);
-                               currentPoly = !currentPoly;
-                               changePoly = true;
-                           }
-
-                       }
-                   }
-                }
-
-            }
-           if(auxB == true)
-                if(auxA == true)
-                    done = true;
-                else
-                    currentPoly = !currentPoly;
-
-       }
-   }
-
-   for(int i =0; i < inter.getNVertices()- 1;i++) ///Remover algum vertice que foi adicionado duplo
-   {
-        for(int j = i+1; j < inter.getNVertices();j++)
-        {
-            if(inter.getVertice(i).x == inter.getVertice(j).x && inter.getVertice(i).y == inter.getVertice(j).y)
-                inter.removeVertice(j);
-        }
-   }
-
-    inter.imprime();
-    cout << endl;
-    return inter;
-}
-Poligono diferenca(Poligono a, Poligono b, bool mark[100], bool markUm[100])
-{
-    unsigned long vertA, vertB;
-    bool debug;
-    vertA = a.getNVertices();
-    vertB = b.getNVertices();
- //   Poligono newA = Poligono(), newB = Poligono();
-    Poligono diff = Poligono(), invertB = Poligono();
-    Ponto classificacao, auxClass;
-   // bool markA[100], markB[100],, isInside = false;
-    bool invertMarkB[100];
-
-    /// Inverte o poligono B e suas marcacoes em relacao ao A
-    for(int i = 0; i < b.getNVertices();i++)
-    {
-        //bool invertMark;
-       // invertMark = mark[b.getNVertices()-1-i];
-        invertB.insereVertice(b.getVertice(b.getNVertices()-1 -i ));
-       // invertMarkB[i] = mark[b.getNVertices()-1-i];
-    }
-    invertB.imprime();
-    classifica(invertB,a,invertMarkB);
-    cout << endl;
-    for(int i = 0; i < b.getNVertices(); i++)
-        cout << invertMarkB[i];
-
-    cout << endl;
-
-
-    int verts = a.getNVertices();
-    bool currentPoly = true; //true = poligono 1, false = poligono 2
-    bool visitedA[100], visitedB[100], done = false;
-    bool changePoly = false;
-    Ponto last;
-    cout << changePoly << endl;
-   while(!done) /// Construcao do poligono uniao A-B
-   {
-    bool auxA,auxB;
-       if(currentPoly == true) ///Comecamos analisando o poligono A
-       {
-           auxA = true; ///variavel de controle que sinaliza se todos os vertices ja foram visitados
-           for(int i = 0; i < a.getNVertices();i++)
-           {
-                if(a.getVertice(i).x == last.x && a.getVertice(i).y == last.y)
-                    changePoly = false; /// variavel de controle que sinaliza que trocamos o Poligono analisado, ela serve para encontrarmos de qual vertices devemos continuar quando trocarmos
-                if(changePoly == false)
-                {
-                    if (visitedA[i] == false)
-                    {
-                       auxA = false; /// marcar como falso significa que encontramos um vertice ainda nao visitado, ou seja ainda nao acabamos;
-                       if (markUm[i] == false)
-                       {
-                                cout << "adding A" << " ";
-                                a.getVertice(i).imprime();
-                                if(i == a.getNVertices() -1 )
-                                    a.getVertice(0).imprime();
-                                else
-                                    a.getVertice(i+1).imprime();
-                                cout << endl;
-                                /// adicionamos a aresta ao poligono, caso a marcacao dizer que a aresta esta fora
-                                if(diff.getNVertices() == 0)
-                                    diff.insereVertice(a.getVertice(i));
-                                if(i == a.getNVertices() -1 )
-                                            diff.insereVertice(a.getVertice(0));
-                                else
-                                            diff.insereVertice(a.getVertice(i+1));
-                                visitedA[i] = true;
-                       }
-                       else
-                       {
-                           if(diff.getNVertices() != 0)
-                           {
-
-                            cout << "Troca A ";
-                            a.getVertice(i).imprime();
-                            cout << endl;
-                            last = diff.getVertice(diff.getNVertices()-1);;
-                            currentPoly = !currentPoly; /// se a aresta estiver dentro do outro poligono, trocamos para ele
-                            changePoly = true;
-                           }
-                            visitedA[i] = true;
-                       }
-               }
-           }
-
-
-        }
-        if(auxA == true)
-            if(auxB == true) ///Se os dois poligonos estiverem com seus vertices todos visitados terminamos o processo
-                done = true;
-            else
-                currentPoly = !currentPoly;
-       }
-       else
-       {
-            auxB = true;
-            for(int i = 0; i < invertB.getNVertices();i++)
-            {
-                if(invertB.getVertice(i).x == last.x && invertB.getVertice(i).y == last.y)
-                    changePoly = false;
-                if(changePoly == false)
-                {
-                    if (visitedB[i] == false)
-                   {
-                        auxB = false;
-                        bool invertMark;
-                        if(i == invertB.getNVertices() -1 )
-                            invertMark = invertMarkB[0];
-                        else
-                            invertMark = invertMarkB[i+1];
-                       if (invertMarkB[i] == true && invertMark == true)
-                       {
-
-                           if(invertMark == true)
-                           {
-                               cout << "adding B " << " ";
-                                invertB.getVertice(i).imprime();
-                                if(i == invertB.getNVertices() -1 )
-                                    invertB.getVertice(0).imprime();
-                                else
-                                    invertB.getVertice(i+1).imprime();
-                                cout << endl;
-                                if(diff.getNVertices() == 0)
-                                    diff.insereVertice(invertB.getVertice(i));
-                                if(i == invertB.getNVertices() -1 )
-                                            diff.insereVertice(invertB.getVertice(0));
-                                else
-                                            diff.insereVertice(invertB.getVertice(i+1));
-
-                                visitedB[i] = true;
-                           }
-
-                       }
-                       else
-                       {
-                            if(diff.getNVertices() != 0)
-                           {
-                               cout << "Troca B ";
-                                invertB.getVertice(i).imprime();
-                                cout << endl;
-                               visitedB[i] = true;
-                               last = diff.getVertice(diff.getNVertices()-1);
-                               currentPoly = !currentPoly;
-                               changePoly = true;
-                           }
-                            visitedB[i] = true;
-
-                       }
-                   }
-                }
-
-
-            }
-           if(auxB == true)
-                if(auxA == true)
-                    done = true;
-                else
-                    currentPoly = !currentPoly;
-
-       }
-   }
-
-   for(int i =0; i < diff.getNVertices()- 1;i++) ///Remover algum vertice que foi adicionado duplo
-   {
-        for(int j = i+1; j < diff.getNVertices();j++)
-        {
-
-            if(diff.getVertice(i).x == diff.getVertice(j).x && diff.getVertice(i).y == diff.getVertice(j).y)
-                diff.removeVertice(j);
-        }
-   }
-
-    diff.imprime();
-    cout << endl;
-    return diff;
-}
 
 salvaPoligono()
 {
